@@ -1,0 +1,88 @@
+{
+  "version": "2.0.0",
+  "description": "Zone classification and FIFO allocation rules for the two-facility plant of the 3D Warehouse Visualizer (Facility North at the lines, Facility South as second source).",
+  "target_warehouses": [
+    "WH-NORTH",
+    "WH-SOUTH",
+    "WH-RCV"
+  ],
+  "allocation_sort_keys": [
+    "facility_priority",
+    "lot_date",
+    "gr_date",
+    "bin"
+  ],
+  "deduct_in_transit_from_net_required": false,
+  "rules": [
+    {
+      "zone_id": "LINE_CART_BUFFER",
+      "label": "Line Cart Buffer",
+      "warehouse_pattern": "^WH-NORTH$",
+      "bin_pattern": "^(LCB|BUF)-[0-9]{2,3}$",
+      "treatment": "EXCLUDED_ZERO",
+      "facility_priority": null,
+      "badge_color": "hidden",
+      "description": "Point-of-use feeder carts that must stay full as a safety buffer; treated as zero."
+    },
+    {
+      "zone_id": "LINE_SIDE_FLOOR",
+      "label": "Line-side Floor (Prepared)",
+      "warehouse_pattern": "^WH-NORTH$",
+      "bin_pattern": "^LSF-[A-Z][0-9]{2}$",
+      "treatment": "PREPARED_READY",
+      "facility_priority": null,
+      "badge_color": "gray",
+      "description": "Material already pulled to the assembly floor; deducted from the gross requirement."
+    },
+    {
+      "zone_id": "QUALITY_HOLD",
+      "label": "Quality Hold",
+      "warehouse_pattern": "^(WH-NORTH|WH-SOUTH)$",
+      "bin_pattern": "^[NS]-QH-[0-9]{2}$",
+      "treatment": "REFERENCE_ONLY",
+      "facility_priority": null,
+      "badge_color": "slate",
+      "description": "Pallets on the quality-hold rack: shown for reference, never allocated."
+    },
+    {
+      "zone_id": "IN_TRANSIT",
+      "label": "In Transit (South -> North)",
+      "warehouse_pattern": "^WH-NORTH$",
+      "bin_pattern": "^S[0-9]{2}-[0-9]{2}-[1-5]$",
+      "treatment": "ALLOCATE_REMOTE_GROUP",
+      "facility_priority": 2,
+      "badge_color": "green",
+      "description": "Picked from a South rack: the system warehouse is already North while the bin still shows the South location. Kept on the list so the pallet is not requested twice."
+    },
+    {
+      "zone_id": "GR_PENDING",
+      "label": "GR Pending (Dock)",
+      "warehouse_pattern": "^WH-RCV$",
+      "bin_pattern": "^[NS]-STG-[0-9]{2}$",
+      "treatment": "ALLOCATE_REMOTE_GROUP",
+      "facility_priority": 2,
+      "badge_color": "blue",
+      "description": "Received on the dock staging lanes, waiting for put-away."
+    },
+    {
+      "zone_id": "REMOTE_RACK",
+      "label": "South Rack",
+      "warehouse_pattern": "^WH-SOUTH$",
+      "bin_pattern": "^S[0-9]{2}-[0-9]{2}-[1-5]$",
+      "treatment": "ALLOCATE_REMOTE_GROUP",
+      "facility_priority": 2,
+      "badge_color": "yellow",
+      "description": "Facility South racks: second source, needs a cross-facility transfer."
+    },
+    {
+      "zone_id": "MAIN_RACK",
+      "label": "North Rack",
+      "warehouse_pattern": "^WH-NORTH$",
+      "bin_pattern": "^N[0-9]{2}-[0-9]{2}-[1-5]$",
+      "treatment": "ALLOCATE_MAIN_GROUP",
+      "facility_priority": 1,
+      "badge_color": "default",
+      "description": "Facility North racks next to the lines: first source."
+    }
+  ]
+}

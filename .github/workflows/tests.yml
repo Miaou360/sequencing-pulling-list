@@ -1,0 +1,22 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  engine:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Allocation engine tests
+        run: node --test tests/engine.test.js
+      - name: Converter compiles
+        run: python3 -m py_compile tools/build_from_warehouse.py
